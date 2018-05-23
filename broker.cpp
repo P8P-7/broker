@@ -1,57 +1,15 @@
-#include <memory>
-#include <iostream>
-#include <ostream>
-#include <thread>
-#include <chrono>
-#include <iomanip>
-
-#include <boost/log/core.hpp>
-#include <boost/log/sinks.hpp>
-#include <boost/log/core.hpp>
 #include <boost/log/trivial.hpp>
-#include <boost/core/null_deleter.hpp>
 #include <boost/format.hpp>
 #include <zmq.hpp>
+
+#include <goliath/foundation.h>
 
 constexpr unsigned PUBLISHING_PORT = 5555;
 constexpr unsigned SUBSCRIBING_PORT = 5556;
 
-void coloringFormatter(boost::log::record_view const& rec, boost::log::formatting_ostream& strm) {
-    auto now = std::chrono::high_resolution_clock::now();
-    auto now_c = std::chrono::high_resolution_clock::to_time_t(now);
-
-    std::stringstream ss;
-    ss << std::put_time(std::localtime(&now_c), "%F %T");
-
-    strm << '[' << ss.str() << "] ";
-
-    auto severity = rec.attribute_values()["Severity"].extract<boost::log::trivial::severity_level>();
-    if (severity) {
-        strm << '(' << severity << ") ";
-        switch (severity.get()) {
-            case boost::log::trivial::debug:
-                strm << "\033[32m";
-                break;
-            case boost::log::trivial::info:
-                strm << "\033[34m";
-                break;
-            case boost::log::trivial::fatal:
-                strm << "\033[31m";
-                break;
-            default:
-                break;
-        }
-    }
-
-    strm << rec[boost::log::expressions::smessage];
-
-    // Reset color
-    if (severity) {
-        strm << "\033[0m";
-    }
-}
-
 int main(int argc, char* argv[]) {
+    goliath::util::Console console(&goliath::util::colorConsoleFormatter, "logo-broker.txt");
+
     bool log = false;
     if(argc >= 3) {
         if(argv[1] == "-l" || argv[1] == "--log") {
@@ -60,13 +18,6 @@ int main(int argc, char* argv[]) {
             }
         }
     }
-
-    auto sink = boost::make_shared<boost::log::sinks::synchronous_sink<boost::log::sinks::text_ostream_backend>>();
-    sink->locked_backend()->add_stream(boost::shared_ptr<std::ostream>(&std::cout, boost::null_deleter()));
-
-    sink->set_formatter(&coloringFormatter);
-
-    boost::log::core::get()->add_sink(sink);
 
     BOOST_LOG_TRIVIAL(debug) << "Starting broker...";
 
