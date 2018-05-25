@@ -8,7 +8,7 @@ constexpr unsigned PUBLISHING_PORT = 5555;
 constexpr unsigned SUBSCRIBING_PORT = 5556;
 
 int main(int argc, char* argv[]) {
-    goliath::util::Console console(&goliath::util::colorConsoleFormatter, "logo-broker.txt");
+    goliath::util::Console console(&goliath::util::colorConsoleFormatter, argv[0], "logo-broker.txt");
 
     bool log = false;
     if(argc >= 3) {
