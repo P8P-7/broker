@@ -1,3 +1,4 @@
+#include <thread>
 #include <google/protobuf/util/json_util.h>
 #include <boost/log/trivial.hpp>
 #include <boost/format.hpp>
